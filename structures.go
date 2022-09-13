@@ -51,6 +51,45 @@ type fileSystemOffsetStruct struct {
 	DataRegion     offsetObject
 }
 
+//store commonly accessed sizes
+type sizesStruct struct {
+	SectorsPerCluster int64 //how many sectors are in a cluster
+	BytesPerSector    int64 //how many bytes per sector
+	SectorsPerFat     int64 //how many sectors in a fat
+	BytesPerCluster   int64 //calculated from BytesPerSector and SectorsPerCluster
+}
+
+//arguments for making a fat image
+type fatArgs struct {
+	BytesPerSector      uint16
+	SectorsPerCluster   uint8 //set to -1 to calculate from BytesPerCluster and SectorsPerCluster
+	ReservedSectors     uint16
+	NumberOfFats        uint8
+	NumberOfRootEntries uint16
+	MediaDescriptor     byte   //may remove
+	SectorsPerFat       uint16 //calculate?
+	SectorsPerTrack     uint16
+	NumberOfHeads       uint16
+	HiddenSectors       uint32
+	DriveNumber         byte
+	VolumeLabel         string
+}
+
+var DefaultFat16Args = fatArgs{
+	BytesPerSector:      512,
+	SectorsPerCluster:   255,
+	ReservedSectors:     0,
+	NumberOfFats:        2,
+	NumberOfRootEntries: 512,
+	MediaDescriptor:     0xF8,
+	SectorsPerFat:       0,  //calculate?
+	SectorsPerTrack:     32, //taken from mkfs.fat
+	NumberOfHeads:       2,  //taken from mkfs.fat
+	HiddenSectors:       0,
+	DriveNumber:         0x80,
+	VolumeLabel:         "NO NAME",
+}
+
 //Add these offsets to offset of directory (is this a FAT16 only structure?)
 var directoryEntryOffsets = directoryEntryOffsetsStruct{
 	offsetObject{0x00, 8}, //Filename
